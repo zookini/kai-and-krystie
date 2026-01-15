@@ -7,33 +7,43 @@
     <title>Kai & Krystie | Seating Chart</title>
     <link rel="stylesheet" href="common.css">
     <style>
+        html,
         body {
             overflow: hidden;
-            /* Prevent body scroll globally, main/modal will handle internal if needed */
+            height: 100vh;
+            height: 100dvh;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-color);
         }
 
         header {
             text-align: center;
-            padding: 20px 20px 10px;
+            padding: 15px 20px 10px;
             background: linear-gradient(to bottom, #fff, var(--bg-color));
             flex-shrink: 0;
         }
 
         h1 {
             font-family: 'Playfair Display', serif;
-            font-size: clamp(1.8rem, 6vw, 2.5rem);
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
             margin-bottom: 2px;
             color: var(--primary-gold);
             letter-spacing: 1px;
         }
 
         .subtitle {
-            font-size: 0.8rem;
+            font-size: 0.75rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 2px;
             font-weight: 300;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
 
         .search-container {
@@ -44,12 +54,13 @@
 
         #search-box {
             width: 100%;
-            padding: 12px 20px;
+            padding: 10px 20px;
             border-radius: 30px;
             border: 1px solid var(--glass-border);
             background: white;
             font-family: 'Inter', sans-serif;
-            font-size: 0.95rem;
+            font-size: 16px;
+            /* Prevents zoom on mobile */
             box-shadow: var(--shadow);
             transition: all 0.3s ease;
             outline: none;
@@ -61,29 +72,32 @@
         }
 
         .container {
-            max-width: 1200px;
+            max-width: 1400px;
+            /* Wider to fit more columns */
+            width: 100%;
             margin: 0 auto;
-            padding: 10px 20px 20px;
-            height: calc(100vh - 150px);
-            /* Adjust based on header height */
+            padding: 5px 15px 15px;
+            flex: 1;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
 
         .table-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 15px;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: repeat(3, 1fr);
+            gap: 10px;
             height: 100%;
-            overflow-y: auto;
-            padding: 10px 5px;
+            overflow: hidden;
+            padding: 5px;
         }
 
         .table-card {
             background: var(--card-bg);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 35px 20px;
+            border-radius: 12px;
+            padding: 10px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -91,12 +105,14 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
-            min-height: 180px;
+            align-items: center;
+            min-height: 0;
+            /* Important: allow shrinking */
         }
 
         .table-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 15px 45px rgba(197, 160, 89, 0.12);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(197, 160, 89, 0.15);
             border-color: var(--primary-gold);
         }
 
@@ -105,17 +121,22 @@
         }
 
         .table-number {
-            font-size: 2.2rem;
+            font-size: 1.4rem;
             color: var(--primary-gold);
-            margin-bottom: 8px;
+            margin-bottom: 2px;
+            font-weight: 600;
         }
 
         .mascot-name {
-            font-size: 0.95rem;
+            font-size: 0.75rem;
             font-weight: 600;
             color: var(--text-muted);
             text-transform: uppercase;
-            letter-spacing: 1.5px;
+            letter-spacing: 1px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
         }
 
         /* Modal Styles */
@@ -139,7 +160,7 @@
             width: 100%;
             max-width: 600px;
             border-radius: 24px;
-            padding: 50px 40px;
+            padding: 40px;
             position: relative;
             box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
             animation: modalSlideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
@@ -161,14 +182,14 @@
 
         .close-btn {
             position: absolute;
-            top: 25px;
-            right: 25px;
-            width: 40px;
-            height: 40px;
+            top: 20px;
+            right: 20px;
+            width: 35px;
+            height: 35px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 28px;
+            font-size: 24px;
             cursor: pointer;
             color: var(--text-muted);
             border-radius: 50%;
@@ -183,11 +204,11 @@
 
         .modal-header {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 20px;
         }
 
         .modal-title {
-            font-size: 2.5rem;
+            font-size: 2rem;
             color: var(--primary-gold);
             margin-bottom: 5px;
         }
@@ -196,7 +217,7 @@
             text-transform: uppercase;
             letter-spacing: 3px;
             color: var(--text-muted);
-            font-size: 1rem;
+            font-size: 0.9rem;
             font-weight: 300;
         }
 
@@ -208,7 +229,7 @@
         .guest-item {
             display: flex;
             align-items: center;
-            padding: 22px 0;
+            padding: 15px 0;
             border-bottom: 1px solid var(--accent-soft);
         }
 
@@ -220,20 +241,20 @@
             flex-shrink: 0;
             background: var(--primary-gold);
             color: white;
-            width: 45px;
-            height: 45px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 600;
-            margin-right: 25px;
+            margin-right: 20px;
             box-shadow: 0 4px 10px rgba(197, 160, 89, 0.2);
         }
 
         .guest-name {
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: 500;
             color: var(--text-main);
             letter-spacing: -0.01em;
@@ -241,105 +262,75 @@
 
         /* Mobile specific layout: FIXED HEIGHT, NO SCROLL */
         @media (max-width: 600px) {
-            body {
-                height: 100vh;
-                display: flex;
-                flex-direction: column;
-            }
-
             header {
                 padding: 10px 10px 5px;
             }
 
             h1 {
-                font-size: 1.4rem;
+                font-size: 1.3rem;
             }
 
             .subtitle {
-                margin-bottom: 8px;
-                font-size: 0.65rem;
+                margin-bottom: 5px;
+                font-size: 0.6rem;
             }
 
             #search-box {
-                padding: 9px 15px;
+                padding: 8px 15px;
                 font-size: 16px;
-                /* Prevents iOS auto-zoom */
             }
 
             .container {
-                flex: 1;
-                padding: 2px 5px 5px;
-                height: auto;
+                padding: 5px;
             }
 
             .table-grid {
                 grid-template-columns: repeat(3, 1fr);
                 grid-template-rows: repeat(6, 1fr);
-                gap: 4px;
-                overflow: hidden;
-                /* FORCE NO SCROLL */
+                gap: 5px;
             }
 
             .table-card {
-                min-height: 0;
-                /* Allow shrinking */
-                padding: 4px 2px;
-                border-radius: 6px;
-                min-height: 55px;
-                /* Ensure some height */
+                padding: 5px 2px;
+                border-radius: 8px;
             }
 
             .table-number {
-                font-size: 1.1rem;
-                margin-bottom: 2px;
+                font-size: 1rem;
+                margin-bottom: 1px;
             }
 
             .mascot-name {
-                font-size: 0.6rem;
-                letter-spacing: 0.3px;
-                display: -webkit-box;
-                -webkit-line-clamp: 2;
-                line-clamp: 2;
-                -webkit-box-orient: vertical;
-                overflow: hidden;
+                font-size: 0.55rem;
+                letter-spacing: 0.2px;
             }
 
             .modal {
-                padding: 15px 15px 20px;
+                padding: 20px;
                 border-radius: 20px;
                 max-height: 95vh;
-                min-height: 0;
-            }
-
-            #modal-overlay {
-                padding: 15px;
             }
 
             .modal-header {
-                margin-bottom: 10px;
+                margin-bottom: 15px;
             }
 
             .modal-title {
                 font-size: 1.5rem;
             }
 
-            .modal-subtitle {
-                font-size: 0.7rem;
-                letter-spacing: 2px;
-            }
-
             .guest-item {
-                padding: 5px 0;
+                padding: 10px 0;
             }
 
             .guest-name {
-                font-size: 0.95rem;
+                font-size: 1rem;
             }
 
             .seat-badge {
-                width: 26px;
-                height: 26px;
-                font-size: 0.8rem;
+                width: 28px;
+                height: 28px;
+                font-size: 0.85rem;
                 margin-right: 12px;
             }
         }
@@ -347,9 +338,9 @@
         .no-results {
             grid-column: 1 / -1;
             text-align: center;
-            padding: 60px 20px;
+            padding: 40px 20px;
             color: var(--text-muted);
-            font-size: 1.1rem;
+            font-size: 1rem;
             display: none;
         }
     </style>
