@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kai & Krystie | Seating Chart - Print Version</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&family=Inter:wght@300;400;500&display=swap"
+        rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        @page {
+            size: A4;
+            margin: 12mm;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: white;
+            color: #333;
+            line-height: 1.2;
+            padding: 8px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3px;
+            padding-bottom: 2px;
+            border-bottom: 1px solid #c5a059;
+        }
+
+        .header h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 16px;
+            color: #c5a059;
+            margin-bottom: 0;
+        }
+
+        .header .subtitle {
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            color: #666;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 4px;
+        }
+
+        .table-section {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 3px;
+            padding: 4px;
+            break-inside: avoid;
+        }
+
+        .table-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            margin-bottom: 4px;
+            padding-bottom: 3px;
+            border-bottom: 1px solid #c5a059;
+        }
+
+        .table-number {
+            font-size: 11px;
+            font-weight: 600;
+            color: #c5a059;
+        }
+
+        .mascot-name {
+            font-size: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: #888;
+        }
+
+        .guest-list {
+            list-style: none;
+        }
+
+        .guest-item {
+            font-size: 8px;
+            padding: 1.5px 0;
+            display: flex;
+            align-items: center;
+        }
+
+        .seat-num {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            background: #c5a059;
+            color: white;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 14px;
+            font-size: 7.5px;
+            font-weight: 600;
+            margin-right: 5px;
+            flex-shrink: 0;
+        }
+
+        .guest-name {
+            flex: 1;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .table-section {
+                background: white;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="header">
+        <h1>Kai & Krystie</h1>
+        <div class="subtitle">Seating Chart</div>
+    </div>
+
+    <div class="grid" id="seating-grid">
+        <!-- Tables will be dynamically loaded here -->
+    </div>
+
+    <script>
+        async function loadSeating() {
+            try {
+                const response = await fetch('seating.tsv');
+                const text = await response.text();
+
+                const lines = text.trim().split('\n');
+                const rows = lines.slice(1).map(line => {
+                    const columns = line.split('\t');
+                    return {
+                        table: columns[0]?.trim(),
+                        mascot: columns[1]?.trim(),
+                        seat: columns[2]?.trim(),
+                        name: columns[3]?.trim()
+                    };
+                });
+
+                // Group by table
+                const tableData = {};
+                rows.forEach(row => {
+                    if (!row.table) return;
+                    if (!tableData[row.table]) {
+                        tableData[row.table] = {
+                            id: row.table,
+                            mascot: row.mascot,
+                            guests: []
+                        };
+                    }
+                    tableData[row.table].guests.push(row);
+                });
+
+                // Sort tables (Top first, then numeric)
+                const sortedTables = Object.keys(tableData).sort((a, b) => {
+                    if (a === 'Top') return -1;
+                    if (b === 'Top') return 1;
+                    return parseInt(a) - parseInt(b);
+                });
+
+                // Render
+                const grid = document.getElementById('seating-grid');
+                sortedTables.forEach(tableKey => {
+                    const table = tableData[tableKey];
+
+                    // Sort guests by seat number
+                    const sortedGuests = table.guests.sort((a, b) => {
+                        const sA = parseInt(a.seat) || 999;
+                        const sB = parseInt(b.seat) || 999;
+                        return sA - sB;
+                    });
+
+                    const section = document.createElement('div');
+                    section.className = 'table-section';
+
+                    const tableDisplay = table.id === 'Top' ? 'Top Table' : `Table ${table.id}`;
+
+                    section.innerHTML = `
+                        <div class="table-header">
+                            <span class="table-number">${tableDisplay}</span>
+                            <span class="mascot-name">${table.mascot}</span>
+                        </div>
+                        <ul class="guest-list">
+                            ${sortedGuests.map(guest => `
+                                <li class="guest-item">
+                                    <span class="seat-num">${guest.seat || '-'}</span>
+                                    <span class="guest-name">${guest.name}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    `;
+
+                    grid.appendChild(section);
+                });
+
+                // Auto-print after a short delay
+                setTimeout(() => window.print(), 500);
+
+            } catch (error) {
+                console.error('Error loading seating data:', error);
+                document.getElementById('seating-grid').innerHTML =
+                    '<div style="padding: 20px; text-align: center; color: #999;">Error loading seating data. Please ensure the page is served from a web server.</div>';
+            }
+        }
+
+        loadSeating();
+    </script>
+</body>
+
+</html>
