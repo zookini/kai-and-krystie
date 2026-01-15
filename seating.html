@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kai & Krystie | Seating Chart</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body {
+            overflow: hidden;
+            /* Prevent body scroll globally, main/modal will handle internal if needed */
+        }
+
+        header {
+            text-align: center;
+            padding: 20px 20px 10px;
+            background: linear-gradient(to bottom, #fff, var(--bg-color));
+            flex-shrink: 0;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.8rem, 6vw, 2.5rem);
+            margin-bottom: 2px;
+            color: var(--primary-gold);
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 300;
+            margin-bottom: 12px;
+        }
+
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        #search-box {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            background: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.95rem;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        #search-box:focus {
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 10px 20px 20px;
+            height: calc(100vh - 150px);
+            /* Adjust based on header height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .table-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 15px;
+            height: 100%;
+            overflow-y: auto;
+            padding: 10px 5px;
+        }
+
+        .table-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 35px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 180px;
+        }
+
+        .table-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 15px 45px rgba(197, 160, 89, 0.12);
+            border-color: var(--primary-gold);
+        }
+
+        .table-card.hidden {
+            display: none;
+        }
+
+        .table-number {
+            font-size: 2.2rem;
+            color: var(--primary-gold);
+            margin-bottom: 8px;
+        }
+
+        .mascot-name {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+        }
+
+        /* Modal Styles */
+        #modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+        }
+
+        .modal {
+            background: white;
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px;
+            padding: 50px 40px;
+            position: relative;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.25);
+            animation: modalSlideUp 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        @keyframes modalSlideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 25px;
+            right: 25px;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-radius: 50%;
+            transition: all 0.2s;
+            background: var(--bg-color);
+        }
+
+        .close-btn:hover {
+            background: var(--accent-soft);
+            color: var(--primary-gold);
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .modal-title {
+            font-size: 2.5rem;
+            color: var(--primary-gold);
+            margin-bottom: 5px;
+        }
+
+        .modal-subtitle {
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            font-size: 1rem;
+            font-weight: 300;
+        }
+
+        .guest-list {
+            list-style: none;
+            border-top: 1px solid var(--accent-soft);
+        }
+
+        .guest-item {
+            display: flex;
+            align-items: center;
+            padding: 22px 0;
+            border-bottom: 1px solid var(--accent-soft);
+        }
+
+        .guest-item:last-child {
+            border-bottom: none;
+        }
+
+        .seat-badge {
+            flex-shrink: 0;
+            background: var(--primary-gold);
+            color: white;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-right: 25px;
+            box-shadow: 0 4px 10px rgba(197, 160, 89, 0.2);
+        }
+
+        .guest-name {
+            font-size: 1.4rem;
+            font-weight: 500;
+            color: var(--text-main);
+            letter-spacing: -0.01em;
+        }
+
+        /* Mobile specific layout: FIXED HEIGHT, NO SCROLL */
+        @media (max-width: 600px) {
+            body {
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+
+            header {
+                padding: 10px 10px 5px;
+            }
+
+            h1 {
+                font-size: 1.4rem;
+            }
+
+            .subtitle {
+                margin-bottom: 8px;
+                font-size: 0.65rem;
+            }
+
+            #search-box {
+                padding: 9px 15px;
+                font-size: 16px;
+                /* Prevents iOS auto-zoom */
+            }
+
+            .container {
+                flex: 1;
+                padding: 2px 5px 5px;
+                height: auto;
+            }
+
+            .table-grid {
+                grid-template-columns: repeat(3, 1fr);
+                grid-template-rows: repeat(6, 1fr);
+                gap: 4px;
+                overflow: hidden;
+                /* FORCE NO SCROLL */
+            }
+
+            .table-card {
+                min-height: 0;
+                /* Allow shrinking */
+                padding: 4px 2px;
+                border-radius: 6px;
+                min-height: 55px;
+                /* Ensure some height */
+            }
+
+            .table-number {
+                font-size: 1.1rem;
+                margin-bottom: 2px;
+            }
+
+            .mascot-name {
+                font-size: 0.6rem;
+                letter-spacing: 0.3px;
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+
+            .modal {
+                padding: 15px 15px 20px;
+                border-radius: 20px;
+                max-height: 95vh;
+                min-height: 0;
+            }
+
+            #modal-overlay {
+                padding: 15px;
+            }
+
+            .modal-header {
+                margin-bottom: 10px;
+            }
+
+            .modal-title {
+                font-size: 1.5rem;
+            }
+
+            .modal-subtitle {
+                font-size: 0.7rem;
+                letter-spacing: 2px;
+            }
+
+            .guest-item {
+                padding: 5px 0;
+            }
+
+            .guest-name {
+                font-size: 0.95rem;
+            }
+
+            .seat-badge {
+                width: 26px;
+                height: 26px;
+                font-size: 0.8rem;
+                margin-right: 12px;
+            }
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 60px 20px;
+            color: var(--text-muted);
+            font-size: 1.1rem;
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Kai & Krystie</h1>
+        <div class="subtitle">Seating Chart</div>
+        <div class="search-container">
+            <input type="text" id="search-box" placeholder="Search for a guest name..." aria-label="Search guests">
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="table-grid" id="grid">
+            <!-- Tables will be injected here -->
+            <div id="no-results" class="no-results">No tables found matching that guest name.</div>
+        </div>
+    </main>
+
+    <div id="modal-overlay">
+        <div class="modal">
+            <span class="close-btn" id="close-modal">&times;</span>
+            <div class="modal-header">
+                <div class="modal-title display-font" id="modal-table-number">Table 0</div>
+                <div class="modal-subtitle" id="modal-mascot-name">Mascot Name</div>
+            </div>
+            <ul class="guest-list" id="modal-guest-list">
+                <!-- Guests will be injected here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        let tableData = {};
+        const grid = document.getElementById('grid');
+        const searchBox = document.getElementById('search-box');
+        const noResults = document.getElementById('no-results');
+        const modalOverlay = document.getElementById('modal-overlay');
+        const closeModal = document.getElementById('close-modal');
+
+        async function init() {
+            try {
+                // Fetch the TSV data
+                const response = await fetch('seating.tsv');
+                const text = await response.text();
+
+                // Parse TSV (tab separated)
+                const lines = text.trim().split('\n');
+                const rows = lines.slice(1).map(line => {
+                    const columns = line.split('\t');
+                    return {
+                        table: columns[0]?.trim(),
+                        mascot: columns[1]?.trim(),
+                        seat: columns[2]?.trim(),
+                        name: columns[3]?.trim(),
+                        notes: columns[4]?.trim() || ''
+                    };
+                });
+
+                // Group by Table
+                rows.forEach(row => {
+                    if (!row.table) return;
+                    if (!tableData[row.table]) {
+                        tableData[row.table] = {
+                            id: row.table,
+                            mascot: row.mascot,
+                            guests: []
+                        };
+                    }
+                    tableData[row.table].guests.push(row);
+                });
+
+                renderGrid();
+            } catch (error) {
+                console.error('Error loading seating data:', error);
+                grid.innerHTML = '<div class="no-results" style="display:block">Error loading seating data. Please ensure the page is served from a web server.</div>';
+            }
+        }
+
+        function renderGrid(filter = '') {
+            const container = document.getElementById('grid');
+            const searchTerms = filter.toLowerCase().trim().split(/\s+/);
+
+            // Re-render only cards (keep no-results div)
+            const existingCards = container.querySelectorAll('.table-card');
+            existingCards.forEach(c => c.remove());
+
+            const sortedKeys = Object.keys(tableData).sort((a, b) => {
+                if (a === 'Top') return -1;
+                if (b === 'Top') return 1;
+                return parseInt(a) - parseInt(b);
+            });
+
+            let visibleCount = 0;
+
+            sortedKeys.forEach(key => {
+                const table = tableData[key];
+
+                // Filter logic: check if any guest name matches the search terms
+                const matches = filter === '' || table.guests.some(guest => {
+                    const guestName = guest.name.toLowerCase();
+                    return searchTerms.every(term => guestName.includes(term));
+                });
+
+                if (matches) {
+                    const card = document.createElement('div');
+                    card.className = 'table-card';
+                    card.innerHTML = `
+                        <div class="table-number">${table.id === 'Top' ? 'Top Table' : 'Table ' + table.id}</div>
+                        <div class="mascot-name">${table.mascot}</div>
+                    `;
+                    card.onclick = () => showTableDetails(table);
+                    container.appendChild(card);
+                    visibleCount++;
+                }
+            });
+
+            noResults.style.display = visibleCount === 0 ? 'block' : 'none';
+        }
+
+        function showTableDetails(table) {
+            document.getElementById('modal-table-number').innerText = table.id === 'Top' ? 'Top Table' : 'Table ' + table.id;
+            document.getElementById('modal-mascot-name').innerText = table.mascot;
+
+            const guestList = document.getElementById('modal-guest-list');
+            guestList.innerHTML = '';
+
+            // Sort guests by seat number
+            const sortedGuests = [...table.guests].sort((a, b) => {
+                const sA = parseInt(a.seat) || 999;
+                const sB = parseInt(b.seat) || 999;
+                return sA - sB;
+            });
+
+            sortedGuests.forEach(guest => {
+                const li = document.createElement('li');
+                li.className = 'guest-item';
+                li.innerHTML = `
+                    <div class="seat-badge">${guest.seat || '-'}</div>
+                    <span class="guest-name">${guest.name}</span>
+                `;
+                guestList.appendChild(li);
+            });
+
+            modalOverlay.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        searchBox.addEventListener('input', (e) => {
+            renderGrid(e.target.value);
+        });
+
+        closeModal.onclick = () => {
+            modalOverlay.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        };
+
+        window.onclick = (event) => {
+            if (event.target == modalOverlay) {
+                closeModal.onclick();
+            }
+        };
+
+        // Initialize
+        init();
+    </script>
+</body>
+
+</html>
