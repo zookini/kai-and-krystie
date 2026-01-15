@@ -20,7 +20,7 @@
         /* Default to landscape */
         @page {
             size: A4 landscape;
-            margin: 12mm;
+            margin: 10mm;
         }
 
         body {
@@ -28,12 +28,12 @@
             background: white;
             color: #333;
             line-height: 1.2;
-            padding: 6px;
+            padding: 4px;
         }
 
         .header {
             text-align: center;
-            margin-bottom: 3px;
+            margin-bottom: 2px;
             padding-bottom: 2px;
             border-bottom: 1px solid #c5a059;
         }
@@ -55,23 +55,20 @@
         .grid {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 4px;
+            gap: 3px;
         }
 
         .table-section {
             background: #fafafa;
             border: 1px solid #e0e0e0;
             border-radius: 4px;
-            padding: 4px;
+            padding: 3px;
             break-inside: avoid;
         }
 
         .table-header {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 5px;
-            margin-bottom: 3px;
+            text-align: center;
+            margin-bottom: 2px;
             padding-bottom: 2px;
             border-bottom: 1px solid #c5a059;
         }
@@ -80,13 +77,16 @@
             font-size: 11px;
             font-weight: 600;
             color: #c5a059;
+            display: block;
+            margin-bottom: 1px;
         }
 
         .mascot-name {
-            font-size: 9px;
+            font-size: 8px;
             text-transform: uppercase;
             letter-spacing: 0.8px;
             color: #888;
+            display: block;
         }
 
         .guest-list {
@@ -147,34 +147,35 @@
         /* Portrait mode adjustments */
         body.portrait .grid {
             grid-template-columns: repeat(4, 1fr);
-            gap: 5px;
+            gap: 4px;
         }
 
         body.portrait .table-section {
-            padding: 5px;
+            padding: 4px;
         }
 
         body.portrait .header h1 {
-            font-size: 17px;
+            font-size: 16px;
             margin-bottom: 1px;
         }
 
         body.portrait .header {
-            margin-bottom: 4px;
-            padding-bottom: 3px;
+            margin-bottom: 3px;
+            padding-bottom: 2px;
         }
 
         body.portrait .table-header {
-            margin-bottom: 4px;
-            padding-bottom: 3px;
+            margin-bottom: 2px;
+            padding-bottom: 2px;
         }
 
         body.portrait .table-number {
-            font-size: 11.5px;
+            font-size: 11px;
+            margin-bottom: 1px;
         }
 
         body.portrait .mascot-name {
-            font-size: 8.5px;
+            font-size: 8px;
         }
 
         body.portrait .guest-item {
@@ -279,8 +280,8 @@
 
                     section.innerHTML = `
                         <div class="table-header">
-                            <span class="table-number">${tableDisplay}</span>
-                            <span class="mascot-name">${table.mascot}</span>
+                            <div class="table-number">${tableDisplay}</div>
+                            <div class="mascot-name">${table.mascot}</div>
                         </div>
                         <ul class="guest-list">
                             ${sortedGuests.map(guest => `
@@ -316,7 +317,7 @@
             if (body.classList.contains('portrait')) {
                 body.classList.remove('portrait');
                 button.textContent = 'Switch to Portrait';
-                pageStyle.textContent = '@page { size: A4 landscape; margin: 12mm; }';
+                pageStyle.textContent = '@page { size: A4 landscape; margin: 10mm; }';
             } else {
                 body.classList.add('portrait');
                 button.textContent = 'Switch to Landscape';
