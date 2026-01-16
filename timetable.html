@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kai & Krystie | Timetable</title>
+    <link rel="stylesheet" href="common.css">
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            background-color: var(--bg-color);
+            min-height: 100vh;
+        }
+
+        header {
+            text-align: center;
+            padding: 15px 20px 10px;
+            background: linear-gradient(to bottom, #fff, var(--bg-color));
+            flex-shrink: 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 1px solid var(--glass-border);
+            backdrop-filter: blur(8px);
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.5rem, 5vw, 2.2rem);
+            margin-bottom: 2px;
+            color: var(--primary-gold);
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-weight: 300;
+            margin-bottom: 8px;
+        }
+
+        .search-container {
+            max-width: 500px;
+            margin: 0 auto 10px;
+            position: relative;
+        }
+
+        #search-box {
+            width: 100%;
+            padding: 8px 20px;
+            border-radius: 30px;
+            border: 1px solid var(--glass-border);
+            background: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 16px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+            outline: none;
+        }
+
+        #search-box:focus {
+            border-color: var(--primary-gold);
+            box-shadow: 0 0 0 4px rgba(197, 160, 89, 0.1);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+            font-size: 1rem;
+            display: none;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 20px 15px;
+            flex: 1;
+        }
+
+        .timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+        }
+
+        .time-slot {
+            position: relative;
+            padding-left: 0;
+            animation: slideUp 0.5s ease-out forwards;
+            opacity: 0;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .slot-card {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .slot-card:hover {
+            transform: scale(1.005);
+            border-color: var(--primary-gold);
+            box-shadow: 0 5px 15px rgba(197, 160, 89, 0.1);
+        }
+
+        .slot-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            border-bottom: 1px solid var(--accent-soft);
+            padding-bottom: 5px;
+        }
+
+        .time-label {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-gold);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .location-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            background: var(--accent-soft);
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .event-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: var(--text-main);
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+
+        .assignments {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        .assignment-item {
+            display: flex;
+            flex-direction: row;
+            align-items: baseline;
+            gap: 8px;
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.5);
+            border-radius: 6px;
+            font-size: 0.85rem;
+        }
+
+        .person-name {
+            font-weight: 700;
+            color: var(--primary-gold);
+            white-space: nowrap;
+            min-width: 60px;
+        }
+
+        .task-description {
+            color: var(--text-main);
+            line-height: 1.2;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px 10px;
+            }
+
+            .time-slot {
+                padding-left: 35px;
+            }
+
+            .timeline::before {
+                left: 12px;
+            }
+
+            .time-slot::before {
+                left: 6px;
+                width: 10px;
+                height: 10px;
+            }
+
+            .slot-card {
+                padding: 15px;
+            }
+
+            .event-title {
+                font-size: 1.2rem;
+            }
+
+            .assignments {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>Kai & Krystie</h1>
+        <div class="subtitle">Wedding Timetable</div>
+        <div class="search-container">
+            <input type="text" id="search-box" placeholder="Search for a name or event..."
+                aria-label="Search timetable">
+        </div>
+    </header>
+
+    <main class="container">
+        <div id="no-results" class="no-results">No events found matching your search.</div>
+        <div class="timeline" id="timeline">
+            <!-- Time slots will be injected here -->
+        </div>
+    </main>
+
+    <script>
+        let fullData = [];
+        const timelineContainer = document.getElementById('timeline');
+        const searchBox = document.getElementById('search-box');
+        const noResults = document.getElementById('no-results');
+
+        async function init() {
+            try {
+                const response = await fetch('timetable.tsv');
+                const text = await response.text();
+
+                const lines = text.trim().split('\n');
+                if (lines.length < 2) return;
+
+                const headers = lines[0].split('\t').map(h => h.trim());
+
+                for (let i = 1; i < lines.length; i++) {
+                    const cells = lines[i].split('\t').map(c => c.trim());
+                    if (!cells[0] && !cells[1]) continue;
+
+                    const event = {
+                        time: cells[0],
+                        what: cells[1],
+                        where: cells[2],
+                        assignments: []
+                    };
+
+                    for (let j = 3; j < cells.length; j++) {
+                        if (cells[j]) {
+                            event.assignments.push({
+                                person: headers[j],
+                                task: cells[j]
+                            });
+                        }
+                    }
+                    fullData.push(event);
+                }
+                renderTimeline();
+            } catch (error) {
+                console.error('Error loading timetable:', error);
+                timelineContainer.innerHTML = '<p style="text-align:center; color:var(--text-muted);">Error loading timetable data.</p>';
+            }
+        }
+
+        function renderTimeline(filter = '') {
+            timelineContainer.innerHTML = '';
+            const searchTerms = filter.toLowerCase().trim().split(/\s+/);
+            let visibleCount = 0;
+
+            fullData.forEach((event, index) => {
+                const matches = filter === '' ||
+                    event.what.toLowerCase().includes(filter.toLowerCase()) ||
+                    event.where.toLowerCase().includes(filter.toLowerCase()) ||
+                    event.assignments.some(a =>
+                        a.person.toLowerCase().includes(filter.toLowerCase()) ||
+                        a.task.toLowerCase().includes(filter.toLowerCase())
+                    );
+
+                if (matches) {
+                    const slot = document.createElement('div');
+                    slot.className = 'time-slot';
+                    slot.style.animationDelay = `${visibleCount * 0.05}s`;
+
+                    let assignmentsHTML = '';
+                    event.assignments.forEach(a => {
+                        assignmentsHTML += `
+                            <div class="assignment-item">
+                                <span class="person-name">${a.person}</span>
+                                <span class="task-description">${a.task}</span>
+                            </div>
+                        `;
+                    });
+
+                    slot.innerHTML = `
+                        <div class="slot-card">
+                            <div class="slot-header">
+                                <div class="time-label">${event.time || '—'}</div>
+                                <div class="location-label">${event.where || '—'}</div>
+                            </div>
+                            <div class="event-title">${event.what}</div>
+                            <div class="assignments">
+                                ${assignmentsHTML}
+                            </div>
+                        </div>
+                    `;
+                    timelineContainer.appendChild(slot);
+                    visibleCount++;
+                }
+            });
+
+            noResults.style.display = (visibleCount === 0 && filter !== '') ? 'block' : 'none';
+        }
+
+        searchBox.addEventListener('input', (e) => {
+            renderTimeline(e.target.value);
+        });
+
+        init();
+    </script>
+</body>
+
+</html>
